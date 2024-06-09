@@ -1,0 +1,67 @@
+const mongoose = require('mongoose');
+const validator = require('validator');
+const bcrypt = require('bcryptjs');
+
+const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, 'A user must have a name'],
+    unique: true,
+    trim: true,
+    maxlength: [100, 'name must not exceed 50 characters'],
+    minlength: [8, 'name must not be less than 8 characters']
+  },
+
+  email: {
+    type: String,
+    required: [true, 'A user must have a name'],
+    unique: true,
+    lowercase: true,
+    trim: true,
+    validate: [validator.isEmail, 'Please enter a valid email address']
+  },
+
+  password: {
+    type: String,
+    required: [true, 'User must provide a password'],
+    minlength: [8, 'Password must be at least 8 characters long'],
+    maxlength: [249, 'Password must not exceed 249 characters'],
+    select: false
+  },
+
+  passwordConfirm: {
+    type: String,
+    required: [true, 'User must confirm their password'],
+    validate: {
+      validator: function(el) {
+        return el === this.password;
+      },
+      message: 'Passwords do not match'
+    }
+  },
+
+  photo: {
+    type: String,
+    default: 'default.jpg'
+  },
+
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+    select: false
+  }
+});
+
+userSchema.pre('save', async function(next) {
+  // only run this function if password was actually modified
+  if (!this.isModified('password')) return next();
+  // encrypt the password
+  this.password = await bcrypt.hash(this.password, 12);
+  // prevent the passwordConfirm from proceeding to the database
+  this.passwordConfirm = undefined;
+  next();
+});
+
+const User = mongoose.model('User', userSchema);
+
+module.exports = User;
