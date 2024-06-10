@@ -1,4 +1,5 @@
-const AppError = require('../utils/appError');
+const { cloneDeep } = require('lodash');
+const AppError = require('./../utils/appError');
 
 const handleCastErrorDB = err => {
   const message = `Invalid ${err.path}: ${err.value}`;
@@ -44,7 +45,7 @@ const sendErrorPro = (err, req, res) => {
 const handleJWTError = () =>
   new AppError('Invalid token. Please log in again!', 401);
 
-const handleJWTExpiredErrorDB = () =>
+const handleJWTExpiredError = () =>
   new AppError('Your token has expired! Please log in again.', 401);
 
 module.exports = (err, req, res, next) => {
@@ -54,18 +55,15 @@ module.exports = (err, req, res, next) => {
   if (process.env.NODE_ENV === 'development') {
     sendErrorDev(err, req, res);
   } else if (process.env.NODE_ENV === 'production') {
-    let error = Object.assign({}, err);
+    let error = cloneDeep(err);
     error.message = err.message;
-    error.stack = err.stack;
-    error.name = err.name;
-    error.code = err.code;
 
     if (error.name === 'CastError') error = handleCastErrorDB(error);
     if (error.code === 11000) error = handleDuplicationFieldsDB(error);
     if (error.name === 'ValidationError')
       error = handleValidationErrorDB(error);
     if (error.name === 'JsonWebTokenError') error = handleJWTError();
-    if (error.name === 'TokenExpiredError') error = handleJWTExpiredErrorDB();
+    if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
 
     sendErrorPro(error, req, res);
   }

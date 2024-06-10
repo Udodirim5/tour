@@ -18,8 +18,7 @@ router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
 // THIS IS WHERE THE ROUTE FOR THE TOURS ARE HANDLED
 router
   .route('/')
-  // .get(authController.protect, tourController.getAllTours)
-  .get(tourController.getAllTours)
+  .get(authController.protect, tourController.getAllTours)
   .post(tourController.createTour);
 
 router
