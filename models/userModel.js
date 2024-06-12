@@ -69,6 +69,12 @@ const userSchema = new mongoose.Schema({
 
   passwordResetExpires: {
     type: Date
+  },
+
+  active: {
+    type: Boolean,
+    default: true,
+    select: false
   }
 });
 
@@ -85,6 +91,17 @@ userSchema.pre('save', async function(next) {
 userSchema.pre('save', function(next) {
   if (!this.isModified('password') || this.isNew) return next();
   this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
+userSchema.pre(/^find/, function(next) {
+  // To get only the defined roles
+  this.find({ role: { $in: ['user', 'admin', 'lead-guide', 'guide'] } });
+  next();
+});
+
+userSchema.pre(/^find/, function(next) {
+  this.find({ active: { $ne: false } });
   next();
 });
 
@@ -106,11 +123,6 @@ userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
   }
   return false;
 };
-
-// userSchema.pre(/^find/, function(next) {
-//   this.find({ role: { $ne: 'admin' } });
-//   next();
-// });
 
 userSchema.methods.createPasswordResetToken = function() {
   const resetToken = crypto.randomBytes(32).toString('hex');
