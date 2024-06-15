@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+// const User = require('./userModel');
 
 const tourSchema = new mongoose.Schema(
   {
@@ -24,8 +25,8 @@ const tourSchema = new mongoose.Schema(
       type: String,
       required: [true, 'A tour must have a difficulty'],
       enum: {
-        values: ['easy', 'medium', 'difficulty'],
-        message: 'difficulty must be easy, medium or difficulty'
+        values: ['easy', 'medium', 'difficult'],
+        message: 'difficulty must be easy, medium or difficult'
       }
     },
 
@@ -86,7 +87,46 @@ const tourSchema = new mongoose.Schema(
       default: false
     },
 
-    startDates: [Date]
+    startDates: [Date],
+
+    startLocation: {
+      // GeoJSON
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point']
+      },
+      coordinates: [Number],
+      address: String,
+      description: String
+    },
+
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point']
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number
+      }
+    ],
+
+    // guides: {
+    //   // For Embedding
+    //   type: Array
+    //   }
+    guides: [
+      // For referencing
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        required: [true, 'A tour must have a guide']
+      }
+    ]
   },
 
   {
@@ -105,6 +145,21 @@ tourSchema.pre('save', function(next) {
   this.slug = slugify(this.name, { lower: true });
   next();
 });
+
+// // Embedding document in another
+// tourSchema.pre('save', async function(next) {
+//   if (!this.guides || !Array.isArray(this.guides)) {
+//     return next();
+//   }
+
+//   try {
+//     const guidesPromises = this.guides.map(id => User.findById(id));
+//     this.guides = await Promise.all(guidesPromises);
+//     next();
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 
 // QUERY MIDDLEWARE
 // the middleware that determine the specific user that can have access to a particular data from the database
