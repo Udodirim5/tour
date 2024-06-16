@@ -139,6 +139,13 @@ tourSchema.virtual('durationWeeks').get(function() {
   return this.duration / 7;
 });
 
+// Virtual Populate
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour',
+  localField: '_id'
+});
+
 // DOCUMENT MIDDLEWARE:
 // can only run before .save(); or .create(); and will not work when trying to update the data
 tourSchema.pre('save', function(next) {
@@ -165,6 +172,14 @@ tourSchema.pre('save', function(next) {
 // the middleware that determine the specific user that can have access to a particular data from the database
 tourSchema.pre(/^find/, function(next) {
   this.find({ secretTour: { $ne: true } });
+  next();
+});
+
+tourSchema.pre(/^find/, function(next) {
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt'
+  });
   next();
 });
 
