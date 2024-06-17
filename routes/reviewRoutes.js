@@ -11,15 +11,22 @@ router
   .post(
     authController.protect,
     authController.restrictTo('user'),
+    reviewController.setTourUserId,
     reviewController.createReview
   );
 
-router.route('/:id').get(reviewController.getReview);
-// .patch(authController.protect, reviewController.updateReview)
-// .delete(
-//   authController.protect,
-// authController.restrictTo('admin', 'lead-guide', 'guide', 'user'),
-//   reviewController.removeReview
-// );
+router
+  .route('/:id')
+  .get(reviewController.getReview)
+  .patch(
+    authController.protect,
+    authController.restrictTo('admin', 'lead-guide', 'guide', 'user'),
+    reviewController.updateReview
+  )
+  .delete(
+    authController.protect,
+    authController.restrictTo('admin', 'lead-guide', 'guide', 'user'),
+    reviewController.deleteReview
+  );
 
 module.exports = router;

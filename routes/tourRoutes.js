@@ -30,7 +30,7 @@ router
   .delete(
     authController.protect,
     authController.restrictTo('admin', 'lead-guide'),
-    tourController.removeTour
+    tourController.deleteTour
   );
 
 module.exports = router;
