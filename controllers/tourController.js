@@ -1,8 +1,7 @@
 const Tour = require('./../models/tourModel');
-const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/appError');
 const factory = require('./handlerFactory');
+// const AppError = require('../utils/appError');
 
 exports.eliasTopTours = (req, res, next) => {
   req.query.limit = '5';
@@ -11,24 +10,7 @@ exports.eliasTopTours = (req, res, next) => {
   next();
 };
 
-exports.getAllTours = catchAsync(async (req, res, next) => {
-  // EXECUTE QUERY
-  const features = new APIFeatures(Tour.find(), req.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
-  const tours = await features.query;
-
-  // SENT RESPONSE
-  res.status(200).json({
-    requestedAt: req.requestTime,
-    status: 'success',
-    results: tours.length,
-    data: { tours }
-  });
-});
-
+exports.getAllTours = factory.getAll(Tour);
 exports.getTour = factory.getOne(Tour, { path: 'reviews' });
 exports.createTour = factory.createOne(Tour);
 exports.updateTour = factory.updateOne(Tour);

@@ -13,18 +13,10 @@ const filterObj = (obj, ...allowedFields) => {
   return newObj;
 };
 
-// THIS IS WHERE THE FUNCTION FOR CRUD OPERATIONS ARE DEFINED FOR THE USER TABLE
-exports.getAllUsers = catchAsync(async (req, res, next) => {
-  const users = await User.find();
-
-  // SENT RESPONSE
-  res.status(200).json({
-    requestedAt: req.requestTime,
-    status: 'success',
-    results: users.length,
-    data: { users }
-  });
-});
+exports.getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+};
 
 exports.updateMe = catchAsync(async (req, res, next) => {
   // 1) Throw error if user include password
@@ -62,14 +54,15 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getUser = factory.getOne(User);
-// Do NOT update password with this!
-exports.updateUser = factory.updateOne(User);
-exports.deleteUser = factory.deleteOne(User);
-
 exports.createUser = (req, res) => {
   res.status(500).json({
     status: 'error',
     message: 'This route is not defined, Please use Sign Up instead!'
   });
 };
+
+exports.getAllUsers = factory.getAll(User);
+exports.getUser = factory.getOne(User);
+// Do NOT update password with this!
+exports.updateUser = factory.updateOne(User);
+exports.deleteUser = factory.deleteOne(User);
