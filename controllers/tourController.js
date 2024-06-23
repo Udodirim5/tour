@@ -1,7 +1,7 @@
 const Tour = require('./../models/tourModel');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
-// const AppError = require('../utils/appError');
+const AppError = require('../utils/appError');
 
 exports.eliasTopTours = (req, res, next) => {
   req.query.limit = '5';
@@ -100,6 +100,87 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
     results: plan.length,
     data: {
       plan
+    }
+  });
+});
+
+exports.getToursWithin = catchAsync(async (req, res, next) => {
+  const { distance, latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+
+  // Validate latitude and longitude
+  if (!lat || !lng || Number.isNaN(Number(lat)) || Number.isNaN(Number(lng))) {
+    return next(
+      new AppError(
+        'Please provide valid latitude and longitude in the format lat,lng',
+        400
+      )
+    );
+  }
+
+  // Validate distance
+  if (Number.isNaN(Number(distance))) {
+    return next(new AppError('Please provide a valid distance', 400));
+  }
+
+  const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
+
+  const tours = await Tour.find({
+    startLocation: {
+      $geoWithin: { $centerSphere: [[Number(lng), Number(lat)], radius] }
+    }
+  });
+
+  res.status(200).json({
+    status: 'success',
+    results: tours.length,
+    data: {
+      data: tours
+    }
+  });
+});
+
+exports.getDistances = catchAsync(async (req, res, next) => {
+  const { latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+
+  // Validate latitude and longitude
+  if (!lat || !lng || Number.isNaN(Number(lat)) || Number.isNaN(Number(lng))) {
+    return next(
+      new AppError(
+        'Please provide valid latitude and longitude in the format lat,lng',
+        400
+      )
+    );
+  }
+
+  // Calculate the multiplier based on the unit
+  const multiplier = unit === 'mi' ? 0.000621371 : 0.001; // meters to miles or kilometers
+
+  const distances = await Tour.aggregate([
+    {
+      $geoNear: {
+        near: {
+          type: 'Point',
+          coordinates: [Number(lng), Number(lat)]
+        },
+        distanceField: 'distance',
+        distanceMultiplier: multiplier, // Convert distance to the desired unit
+        spherical: true
+      }
+    },
+    {
+      $project: {
+        distance: 1,
+        name: 1
+      }
+    }
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      data: distances
     }
   });
 });
