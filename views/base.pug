@@ -1,0 +1,38 @@
+doctype html 
+html 
+  head 
+    meta(charset='UTF-8')
+    meta(name='viewport' content='width=device-width, initial-scale=1.0')
+    link(rel='shortcut icon', href='img/favicon.png', type='image/png')
+    link(rel='stylesheet', href='/css/style.css')
+    link(rel='stylesheet', href='https://fonts.googleapis.com/css?family=Lato:300,300i,700')
+    title Natours | #{title}
+
+  body 
+    //- HEADER
+    include _header
+
+    //- CONTENT
+    block content
+      h1 This is a placeholder text
+
+    //- FOOTER
+    include _footer
+
+
+
+//- form.nav__search 
+//- button.nav__search-btn
+//- <form class='nav__search'>
+//- <button class='nav__search-btn'>
+
+//- <svg>
+//- <use xlink:href='img/icons.svg#icon-search'></use>
+//- </svg>
+//- </button>
+//- <input
+//- type='text'
+//- placeholder='Search tours'
+//- class='nav__search-input'
+//- />
+//- </form>
