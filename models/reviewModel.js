@@ -15,21 +15,17 @@ const reviewSchema = new mongoose.Schema(
       max: [5, 'Rating must be less than 5']
     },
 
-    tour: [
-      {
-        type: mongoose.Schema.ObjectId,
-        ref: 'Tour',
-        required: [true, 'Review must belong to a tour']
-      }
-    ],
+    tour: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Tour',
+      required: [true, 'Review must belong to a tour']
+    },
 
-    user: [
-      {
-        type: mongoose.Schema.ObjectId,
-        ref: 'User',
-        required: [true, 'Review must belong to a user']
-      }
-    ],
+    user: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
+      required: [true, 'Review must belong to a user']
+    },
 
     createdAt: {
       type: Date,

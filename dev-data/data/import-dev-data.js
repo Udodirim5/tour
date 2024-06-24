@@ -16,11 +16,13 @@ mongoose
   .connect(DB, {
     useNewUrlParser: true,
     useCreateIndex: true,
-    useFindAndModify: false
+    useFindAndModify: false,
+    useUnifiedTopology: true
   })
-  .then(() => console.log('DB Connection Established!'));
+  .then(() => console.log('DB Connection Established!'))
+  .catch(err => console.error('DB Connection Error:', err));
 
-// READ JSON FILE
+// READ JSON FILES
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/tours.json`, 'utf-8'));
 const users = JSON.parse(fs.readFileSync(`${__dirname}/users.json`, 'utf-8'));
 const reviews = JSON.parse(
@@ -31,25 +33,27 @@ const reviews = JSON.parse(
 const importData = async () => {
   try {
     await Tour.create(tours);
+    console.log('Tours data imported successfully');
     await User.create(users, { validateBeforeSave: false });
+    console.log('Users data imported successfully');
     await Review.create(reviews);
-    console.log('Data imported successfully');
+    console.log('Reviews data imported successfully');
     process.exit();
   } catch (err) {
-    console.error(err);
+    console.error('Error importing data:', err);
   }
 };
 
-//  DELETE ALL DATA FROM COLLECTION AND THEN IMPORT NEW ONE
+// DELETE ALL DATA FROM COLLECTIONS AND THEN IMPORT NEW ONE
 const deleteData = async () => {
   try {
     await Tour.deleteMany();
     await User.deleteMany();
     await Review.deleteMany();
-    console.log('Data deleted!');
+    console.log('Data deleted successfully');
     process.exit();
   } catch (err) {
-    console.error(err);
+    console.error('Error deleting data:', err);
   }
 };
 
