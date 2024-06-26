@@ -19,6 +19,9 @@ exports.getTour = catchAsync(async (req, res, next) => {
     path: 'reviews',
     fields: 'rating review user'
   });
+  if (!tour) {
+    return next(new AppError('There is no tour with that ID', 404));
+  }
   // 2) Build Template
   // 3) Render That Template Using Pug
   res
